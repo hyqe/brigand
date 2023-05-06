@@ -1,19 +1,28 @@
-package main
+package handlers_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/hyqe/brigand/internal/handlers"
+	"github.com/hyqe/brigand/internal/storage"
 	"github.com/stretchr/testify/require"
 )
 
-func Test_b_happy_path(t *testing.T) {
+func TestNewCreateFile_happy_path(t *testing.T) {
+	metadataClientMock := &storage.MetadataClientMock{
+		CreateFunc: func(ctx context.Context, md *storage.Metadata) error {
+			return nil
+		},
+	}
+
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/files", bytes.NewBuffer([]byte("string")))
-	store_a_file(w, r)
+	handlers.NewCreateFile(metadataClientMock).ServeHTTP(w, r)
 
 	// check status
 	require.Equal(t, http.StatusOK, w.Code)
@@ -24,9 +33,11 @@ func Test_b_happy_path(t *testing.T) {
 	require.NotEmpty(t, mappy["id"])
 }
 
-func Test_store_a_file_no_file(t *testing.T) {
+func TestNewCreateFile_no_file(t *testing.T) {
+	metadataClientMock := &storage.MetadataClientMock{}
+
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/files", nil)
-	store_a_file(w, r)
+	handlers.NewCreateFile(metadataClientMock).ServeHTTP(w, r)
 	require.Equal(t, http.StatusBadRequest, w.Code)
 }
