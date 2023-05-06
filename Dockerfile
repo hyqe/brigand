@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY . .
 
+RUN go test ./...
+
 RUN CGO_ENABLED=0 GOOS=linux go build -o /main
 
 FROM gcr.io/distroless/base-debian11
