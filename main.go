@@ -7,6 +7,7 @@ import (
 )
 
 func main() {
+	// get port
 	addr := fmt.Sprintf(":%v", os.Getenv("PORT"))
 
 	fmt.Println("Running on ", addr)
