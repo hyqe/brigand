@@ -19,6 +19,7 @@ func Run(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
+	defer mongoClient.Disconnect(ctx)
 
 	jack := timber.NewJack(
 		timber.WithLevel(cfg.Level),
