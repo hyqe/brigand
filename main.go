@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/hyqe/brigand/internal/app"
+	"github.com/hyqe/brigand/internal/server"
 )
 
-func main() { app.Run(context.Background()) }
+func main() { server.Run(context.Background()) }
