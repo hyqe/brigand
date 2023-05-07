@@ -19,8 +19,7 @@ func Routes(
 
 	// store a file
 	r.HandleFunc("/files", handlers.NewCreateFile(metadataClient)).
-		Methods(http.MethodPost).
-		Headers("Content-Type", "multipart/form-data")
+		Methods(http.MethodPost)
 
 	// get a file by its Id.
 	r.HandleFunc("/files/{fileId}", handlers.NewGetFileById(metadataClient)).
