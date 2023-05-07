@@ -6,7 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-//go:generate moq -out metadata_mock.go . MetadataClient
 type MetadataClient interface {
 	Create(ctx context.Context, md *Metadata) error
 }
@@ -15,6 +14,16 @@ func NewMongoMetadataClient(c *mongo.Client) MetadataClient {
 	return &mongoMetadataClient{
 		Client: c,
 	}
+}
+
+// MockMetadataClient is a mock of MetadataClient which can be
+// used by tests.
+type MockMetadataClient struct {
+	CreateFunc func(ctx context.Context, md *Metadata) error
+}
+
+func (m *MockMetadataClient) Create(ctx context.Context, md *Metadata) error {
+	return m.CreateFunc(ctx, md)
 }
 
 type mongoMetadataClient struct {

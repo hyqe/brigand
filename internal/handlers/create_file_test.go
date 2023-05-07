@@ -14,7 +14,7 @@ import (
 )
 
 func TestNewCreateFile_happy_path(t *testing.T) {
-	metadataClientMock := &storage.MetadataClientMock{
+	mockMetadataClient := &storage.MockMetadataClient{
 		CreateFunc: func(ctx context.Context, md *storage.Metadata) error {
 			return nil
 		},
@@ -22,7 +22,7 @@ func TestNewCreateFile_happy_path(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/files", bytes.NewBuffer([]byte("string")))
-	handlers.NewCreateFile(metadataClientMock).ServeHTTP(w, r)
+	handlers.NewCreateFile(mockMetadataClient).ServeHTTP(w, r)
 
 	// check status
 	require.Equal(t, http.StatusOK, w.Code)
@@ -34,10 +34,10 @@ func TestNewCreateFile_happy_path(t *testing.T) {
 }
 
 func TestNewCreateFile_no_file(t *testing.T) {
-	metadataClientMock := &storage.MetadataClientMock{}
+	mockMetadataClient := &storage.MockMetadataClient{}
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/files", nil)
-	handlers.NewCreateFile(metadataClientMock).ServeHTTP(w, r)
+	handlers.NewCreateFile(mockMetadataClient).ServeHTTP(w, r)
 	require.Equal(t, http.StatusBadRequest, w.Code)
 }
