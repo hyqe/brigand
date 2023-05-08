@@ -19,31 +19,28 @@ func Run(ctx context.Context) {
 		panic(err)
 	}
 
+	timber.Default.Apply(timber.WithLevel(cfg.Level))
+
 	mongoClient, err := storage.NewMongoClient(ctx, cfg.MongoUri)
 	if err != nil {
 		panic(err)
 	}
 	defer mongoClient.Disconnect(ctx)
 
-	jack := timber.NewJack(
-		timber.WithLevel(cfg.Level),
-	)
-
 	routes := Routes(
 		storage.NewMongoMetadataClient(mongoClient),
 	)
 
-	middleware := timber.NewMiddleware(jack)
+	log := timber.NewMiddleware()
 
-	graceful(ctx, jack, &http.Server{
+	graceful(ctx, &http.Server{
 		Addr:    cfg.Addr(),
-		Handler: middleware(routes),
+		Handler: log(routes),
 	})
 }
 
 func graceful(
 	ctx context.Context,
-	jack timber.Jack,
 	srv *http.Server,
 ) {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, os.Kill)
@@ -55,10 +52,10 @@ func graceful(
 	go func() {
 		defer wg.Done()
 
-		jack.Alert(fmt.Sprintf("listening on '%v'\n", srv.Addr))
+		timber.Alert(fmt.Sprintf("listening on '%v'\n", srv.Addr))
 
 		if err := srv.ListenAndServe(); err != nil {
-			jack.Error(err)
+			timber.Error(err)
 		}
 	}()
 
@@ -66,7 +63,7 @@ func graceful(
 	go func() {
 		defer wg.Done()
 		<-ctx.Done()
-		jack.Alert("shutting down http server")
+		timber.Alert("shutting down http server")
 
 		// if the server takes more then a minute to shutdown, something is seriously wrong.
 		// A minute is overkill, but we just need some failsafe that will ensure the process
@@ -75,7 +72,7 @@ func graceful(
 		defer cancel()
 
 		if err := srv.Shutdown(timeout); err != nil {
-			jack.Error(err)
+			timber.Error(err)
 		}
 	}()
 
