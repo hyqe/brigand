@@ -10,6 +10,7 @@ import (
 
 type MetadataClient interface {
 	Create(ctx context.Context, md *Metadata) error
+	GetById(ctx context.Context, id string) (*Metadata, error)
 	DeleteById(ctx context.Context, id string) error
 }
 
@@ -28,6 +29,9 @@ type MockMetadataClient struct {
 func (m *MockMetadataClient) Create(ctx context.Context, md *Metadata) error {
 	return m.CreateFunc(ctx, md)
 }
+func (m *MockMetadataClient) GetById(ctx context.Context, id string) (*Metadata, error) {
+	return m.GetById(ctx, id)
+}
 
 func (m *MockMetadataClient) DeleteById(ctx context.Context, id string) error {
 	return m.DeleteById(ctx, id)
@@ -35,6 +39,19 @@ func (m *MockMetadataClient) DeleteById(ctx context.Context, id string) error {
 
 type mongoMetadataClient struct {
 	*mongo.Client
+}
+
+func (m *mongoMetadataClient) GetById(ctx context.Context, id string) (*Metadata, error) {
+	filter := bson.D{{Key: "id", Value: id}}
+	coll := metadataColl(m.Client)
+
+	var result Metadata
+	err := coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }
 
 func (m *mongoMetadataClient) Create(ctx context.Context, md *Metadata) error {
