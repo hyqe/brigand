@@ -7,3 +7,11 @@ type Metadata struct {
 	FileName string
 	CreateAt time.Time
 }
+
+func NewMetadata(filename string) *Metadata {
+	return &Metadata{
+		Id:       "none",
+		FileName: filename,
+		CreateAt: time.Now(),
+	}
+}
