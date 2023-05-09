@@ -18,7 +18,6 @@ func Test_mongoMetadataClient_DeleteById_happy_path(t *testing.T) {
 
 	ctx := context.Background()
 	mongoClient, err := storage.NewMongoClient(ctx, MONGO)
-	mongoClient.Connect(ctx)
 	defer mongoClient.Disconnect(ctx)
 
 	// Insert a Document to delete for the test
