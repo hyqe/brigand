@@ -6,6 +6,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MetadataClient interface {
@@ -81,4 +82,14 @@ func brigandDB(m *mongo.Client) *mongo.Database {
 
 func metadataColl(m *mongo.Client) *mongo.Collection {
 	return brigandDB(m).Collection("metadata")
+}
+
+func CreateMetadataIndex(ctx context.Context, coll *mongo.Collection) error {
+	indexModel := mongo.IndexModel{
+		Keys:    bson.D{{Key: "id", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	}
+	_, err := coll.Indexes().CreateOne(context.TODO(), indexModel)
+
+	return err
 }
