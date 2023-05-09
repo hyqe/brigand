@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -10,6 +11,7 @@ import (
 type MetadataClient interface {
 	Create(ctx context.Context, md *Metadata) error
 	GetById(ctx context.Context, id string) (*Metadata, error)
+	DeleteById(ctx context.Context, id string) error
 }
 
 func NewMongoMetadataClient(c *mongo.Client) MetadataClient {
@@ -29,6 +31,10 @@ func (m *MockMetadataClient) Create(ctx context.Context, md *Metadata) error {
 }
 func (m *MockMetadataClient) GetById(ctx context.Context, id string) (*Metadata, error) {
 	return m.GetById(ctx, id)
+}
+
+func (m *MockMetadataClient) DeleteById(ctx context.Context, id string) error {
+	return m.DeleteById(ctx, id)
 }
 
 type mongoMetadataClient struct {
@@ -51,6 +57,22 @@ func (m *mongoMetadataClient) GetById(ctx context.Context, id string) (*Metadata
 func (m *mongoMetadataClient) Create(ctx context.Context, md *Metadata) error {
 	_, err := metadataColl(m.Client).InsertOne(ctx, md)
 	return err
+}
+
+func (m *mongoMetadataClient) DeleteById(ctx context.Context, id string) error {
+	filter := bson.D{{Key: "id", Value: id}}
+	coll := metadataColl(m.Client)
+
+	result, err := coll.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		return err
+	}
+
+	if result.DeletedCount < 1 {
+		return fmt.Errorf("there is no value to delete by this id: %s", id)
+	}
+
+	return nil
 }
 
 func brigandDB(m *mongo.Client) *mongo.Database {
