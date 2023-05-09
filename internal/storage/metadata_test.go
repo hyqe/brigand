@@ -18,7 +18,6 @@ func Test_mongoMetadataClient_GetById_happy_path(t *testing.T) {
 
 	ctx := context.Background()
 	mongoClient, err := storage.NewMongoClient(ctx, MONGO)
-	mongoClient.Connect(ctx)
 	defer mongoClient.Disconnect(ctx)
 
 	coll := mongoClient.Database("brigand").Collection("metadata")
