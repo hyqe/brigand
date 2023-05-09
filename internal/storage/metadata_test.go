@@ -9,7 +9,7 @@ import (
 	"github.com/hyqe/brigand/internal/storage"
 	"github.com/stretchr/testify/require"
 )
-  
+
 func Test_mongoMetadataClient_GetById_happy_path(t *testing.T) {
 	MONGO, ok := os.LookupEnv("MONGO")
 	if !ok {
@@ -21,7 +21,7 @@ func Test_mongoMetadataClient_GetById_happy_path(t *testing.T) {
 	defer mongoClient.Disconnect(ctx)
 
 	coll := mongoClient.Database("brigand").Collection("metadata")
-	doc := storage.Metadata{Id: "none", FileName: "none", CreateAt: time.Now()}
+	doc := storage.Metadata{Id: "none", FileName: "none", CreatedAt: time.Now()}
 	_, err = coll.InsertOne(context.TODO(), doc)
 	require.NoError(t, err)
 
@@ -31,8 +31,7 @@ func Test_mongoMetadataClient_GetById_happy_path(t *testing.T) {
 
 	require.Equal(t, md.Id, "none")
 }
-    
-    
+
 func Test_mongoMetadataClient_DeleteById_happy_path(t *testing.T) {
 	MONGO, ok := os.LookupEnv("MONGO")
 	if !ok {
@@ -44,7 +43,7 @@ func Test_mongoMetadataClient_DeleteById_happy_path(t *testing.T) {
 	defer mongoClient.Disconnect(ctx)
 
 	coll := mongoClient.Database("brigand").Collection("metadata")
-	doc := storage.Metadata{Id: "none", FileName: "none", CreateAt: time.Now()}
+	doc := storage.Metadata{Id: "none", FileName: "none", CreatedAt: time.Now()}
 	_, err = coll.InsertOne(context.TODO(), doc)
 	require.NoError(t, err)
 
