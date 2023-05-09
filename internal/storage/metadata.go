@@ -82,3 +82,12 @@ func brigandDB(m *mongo.Client) *mongo.Database {
 func metadataColl(m *mongo.Client) *mongo.Collection {
 	return brigandDB(m).Collection("metadata")
 }
+
+func CreateMetadataIndex(ctx context.Context, coll *mongo.Collection) error {
+	indexModel := mongo.IndexModel{
+		Keys: bson.D{{Key: "id", Value: 1}},
+	}
+	_, err := coll.Indexes().CreateOne(context.TODO(), indexModel)
+
+	return err
+}
