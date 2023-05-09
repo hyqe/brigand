@@ -13,7 +13,7 @@ import (
 func Test_mongoMetadataClient_GetById_happy_path(t *testing.T) {
 	MONGO, ok := os.LookupEnv("MONGO")
 	if !ok {
-		t.Skipf("missing env: %s", "MONGO")
+		t.Skipf("missing env: MONGO")
 	}
 
 	// Open CLient
