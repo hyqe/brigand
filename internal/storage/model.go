@@ -3,7 +3,7 @@ package storage
 import "time"
 
 type Metadata struct {
-	Id       string
-	FileName string
-	CreateAt time.Time
+	Id        string    `bson:"id"`
+	FileName  string    `bson:"filename"`
+	CreatedAt time.Time `bson:"createdAt"`
 }
