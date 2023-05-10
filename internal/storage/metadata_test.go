@@ -19,6 +19,7 @@ func Test_mongoMetadataClient_GetById_happy_path(t *testing.T) {
 
 	ctx := context.Background()
 	mongoClient, err := storage.NewMongoClient(ctx, MONGO)
+	require.NoError(t, err)
 	defer mongoClient.Disconnect(ctx)
 
 	coll := mongoClient.Database("brigand").Collection("metadata")
@@ -41,6 +42,7 @@ func Test_mongoMetadataClient_DeleteById_happy_path(t *testing.T) {
 
 	ctx := context.Background()
 	mongoClient, err := storage.NewMongoClient(ctx, MONGO)
+	require.NoError(t, err)
 	defer mongoClient.Disconnect(ctx)
 
 	coll := mongoClient.Database("brigand").Collection("metadata")
