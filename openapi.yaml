@@ -18,7 +18,7 @@ paths:
       produces:
       - "application/json"
       responses:
-        "405":
+        "500":
           description: "Invalid input"
       security:
       - petstore_auth:
