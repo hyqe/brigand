@@ -1,0 +1,25 @@
+swagger: "2.0"
+info:
+  description: "File Service"
+  version: "0.1.0"
+  title: "Hyqe - Brigand"
+schemes:
+- "https"
+- "http"
+paths:
+  /files:
+    post:
+      tags:
+      - "Files"
+      summary: "Creates a new file"
+      description: ""
+      consumes:
+      - "application/octet-stream"
+      produces:
+      - "application/json"
+      responses:
+        "405":
+          description: "Invalid input"
+      security:
+      - petstore_auth:
+        - "write:files"
