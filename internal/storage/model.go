@@ -19,3 +19,10 @@ func NewMetadata(filename string) *Metadata {
 	}
 
 }
+
+type Magicdata struct {
+	Id       string `bson:"id"`
+	File     []byte `bson:"file"`
+	Filename string `bson:"filename"`
+	Other    string `bson:"other"`
+}

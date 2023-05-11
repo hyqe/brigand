@@ -13,6 +13,7 @@ type MetadataClient interface {
 	Create(ctx context.Context, md *Metadata) error
 	GetById(ctx context.Context, id string) (*Metadata, error)
 	DeleteById(ctx context.Context, id string) error
+	GetFileById(ctx context.Context, filename string) (*Magicdata, error)
 }
 
 func NewMongoMetadataClient(c *mongo.Client) MetadataClient {
@@ -36,6 +37,10 @@ func (m *MockMetadataClient) GetById(ctx context.Context, id string) (*Metadata,
 
 func (m *MockMetadataClient) DeleteById(ctx context.Context, id string) error {
 	return m.DeleteById(ctx, id)
+}
+
+func (m *MockMetadataClient) GetFileById(ctx context.Context, id string) (*Magicdata, error) {
+	return m.GetFileById(ctx, id)
 }
 
 type mongoMetadataClient struct {
@@ -76,12 +81,31 @@ func (m *mongoMetadataClient) DeleteById(ctx context.Context, id string) error {
 	return nil
 }
 
+func (m *mongoMetadataClient) GetFileById(ctx context.Context, filename string) (*Magicdata, error) {
+	filter := bson.D{{Key: "filename", Value: filename}}
+	coll := magicFileColl(m.Client)
+
+	var result Magicdata
+	fmt.Printf("\nFileName Given: <%s\n", filename)
+
+	err := coll.FindOne(context.TODO(), filter).Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
 func brigandDB(m *mongo.Client) *mongo.Database {
 	return m.Database("brigand")
 }
 
 func metadataColl(m *mongo.Client) *mongo.Collection {
 	return brigandDB(m).Collection("metadata")
+}
+
+func magicFileColl(m *mongo.Client) *mongo.Collection {
+	return brigandDB(m).Collection("magicfiles")
 }
 
 func CreateMetadataIndex(ctx context.Context, coll *mongo.Collection) error {
