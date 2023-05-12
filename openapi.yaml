@@ -1,25 +1,113 @@
-swagger: "2.0"
+# https://swagger.io/docs/specification/about/
+# https://spec.openapis.org/oas/v3.1.0
+openapi: 3.1.0
+
 info:
-  description: "File Service"
-  version: "0.1.0"
-  title: "Hyqe - Brigand"
-schemes:
-- "https"
-- "http"
+  title: Brigand
+  description: File Service
+  version: 0.1.0
+
+servers:
+  - url: https://brigand.hyqe.org
+    description: production
+  - url: http://localhost:8080
+    description: local
+
 paths:
   /files:
     post:
       tags:
-      - "Files"
-      summary: "Creates a new file"
-      description: ""
-      consumes:
-      - "application/octet-stream"
-      produces:
-      - "application/json"
+        - Files
+      summary: Upload Files
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                filename:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
       responses:
-        "500":
-          description: "Invalid input"
-      security:
-      - petstore_auth:
-        - "write:files"
+        200:
+          description: Successfully uploaded a file.
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/ListFilesResponse"
+        400:
+          description: No habla whatever that was.
+    get:
+      tags:
+        - Files
+      summary: Retrieve files.
+      parameters:
+        - name: groupId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: list of files found.
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  filename:
+                    type: array
+                    items:
+                      type: string
+                      format: binary    
+  /files/{fileId}:
+    parameters:
+      - name: fileId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Files
+      summary: Get a file by its id.
+      responses:
+        200:
+          description: OK
+          content:
+            multipart/form-data:
+              schema:
+                type: object
+                properties:
+                  file:
+                    type: string
+                    format: binary
+        404:
+          description: Yo no say.
+      
+components:
+  schemas:
+    ListFilesResponse:
+      description: a list of files.
+      properties:
+        groupId:
+          type: string
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              filename: 
+                type: string
+                description: the unique id of the file.
+              size:
+                type: integer
+                description: number of bytes. equivalent to content-length.
+              createdAt: 
+                type: string
+                format: date-time
