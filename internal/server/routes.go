@@ -16,6 +16,7 @@ func Routes(
 
 	// health check for reverse proxy
 	r.HandleFunc("/", handlers.NewGetHealth())
+	r.HandleFunc("/docs", handlers.GetDocs)
 
 	// store a file
 	r.HandleFunc("/files", handlers.NewCreateFile(metadataClient)).

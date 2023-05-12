@@ -20,7 +20,12 @@
 # Go workspace file
 go.work
 
+# PRE-COMPILED
+internal/handlers/docs.html
+
 # IDE
 .vscode
 .env
+.DS_*
 __debug*
+*ignore.*
