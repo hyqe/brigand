@@ -19,7 +19,12 @@ servers:
 paths:
   /files:
     post:
-      operationId: "1"
+      parameters:
+        - name: filename
+          required: true
+          in: query
+          schema:
+            type: string
       security: []
       tags:
         - Files
@@ -27,51 +32,20 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                filename:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
+          application/octet-stream:
+            schemas:
+              type: string
+              format: binary
       responses:
         200:
           description: Successfully uploaded a file.
           content:
             application/json:
               schema: 
-                $ref: "#/components/schemas/ListFilesResponse"
+                $ref: "#/components/schemas/MetaData"
         400:
           description: No habla whatever that was.
-    get:
-      operationId: "2"
-      tags:
-        - Files
-      summary: Retrieve files.
-      security: []
-      parameters:
-        - name: groupId
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: list of files found.
-          content:
-            multipart/form-data:
-              schema:
-                type: object
-                properties:
-                  filename:
-                    type: array
-                    items:
-                      type: string
-                      format: binary    
-        400:
-          description: No habla whatever that was.
+
   /files/{fileId}:
     parameters:
       - name: fileId
@@ -80,7 +54,6 @@ paths:
         schema:
           type: string
     get:
-      operationId: "3"
       tags:
         - Files
       summary: Get a file by its id.
@@ -88,37 +61,29 @@ paths:
       responses:
         200:
           description: OK
-          content:
-            multipart/form-data:
+          headers:
+            filename:
               schema:
-                type: object
-                properties:
-                  file:
-                    type: string
-                    format: binary
+                type: string
+          content:
+            application/octet-stream:
+              schemas:
+                type: string
+                format: binary
         404:
           description: Yo no say.
       
 components:
   schemas:
-    ListFilesResponse:
-      description: a list of files.
+    MetaData:
+      type: object
       properties:
-        groupId:
+        id:
           type: string
-        files:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              filename: 
-                type: string
-                description: the unique id of the file.
-              size:
-                type: integer
-                description: number of bytes. equivalent to content-length.
-              createdAt: 
-                type: string
-                format: date-time
+          format: uuid
+        filename:
+          type: string
+        createdAt:
+          type: string
+        
+
