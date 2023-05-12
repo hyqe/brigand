@@ -1,12 +1,15 @@
 # https://swagger.io/docs/specification/about/
 # https://spec.openapis.org/oas/v3.1.0
-openapi: 3.0.0
+openapi: 3.1.0
 
 info:
   title: Brigand
   description: File Service
   version: 0.1.0
-
+tags:
+  - name: Files
+    description: |
+      Manage files.
 servers:
   - url: https://brigand.hyqe.org
     description: production
@@ -16,6 +19,8 @@ servers:
 paths:
   /files:
     post:
+      operationId: "1"
+      security: []
       tags:
         - Files
       summary: Upload Files
@@ -41,9 +46,11 @@ paths:
         400:
           description: No habla whatever that was.
     get:
+      operationId: "2"
       tags:
         - Files
       summary: Retrieve files.
+      security: []
       parameters:
         - name: groupId
           in: query
@@ -63,6 +70,8 @@ paths:
                     items:
                       type: string
                       format: binary    
+        400:
+          description: No habla whatever that was.
   /files/{fileId}:
     parameters:
       - name: fileId
@@ -71,9 +80,11 @@ paths:
         schema:
           type: string
     get:
+      operationId: "3"
       tags:
         - Files
       summary: Get a file by its id.
+      security: []
       responses:
         200:
           description: OK

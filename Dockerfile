@@ -1,8 +1,7 @@
 FROM node as docs
 WORKDIR /docs
-COPY openapi.yaml .
-COPY openapi.sh .
-RUN ./openapi.sh
+COPY . .
+RUN scripts/compile_openapi.sh
 
 
 FROM golang:bullseye as compile
