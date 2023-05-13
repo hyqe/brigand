@@ -38,9 +38,9 @@ func NewS3FileUploader(sess *session.Session) FileUploader {
 
 type FileDownloader func(file io.Writer, filename string) error
 
-func s3FileDownloader(sess *session.Session, file io.Writer, filename) error {
+func s3FileDownloader(sess *session.Session, file io.Writer, filename string) error {
 	r, err := s3.New(sess).GetObject(&s3.GetObjectInput{
-		Key:    aws.String(filename),
+		Key: aws.String(filename),
 	})
 	if err != nil {
 		return err
