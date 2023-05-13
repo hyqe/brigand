@@ -8,19 +8,36 @@ import (
 )
 
 const (
-	env_PORT  = "PORT"
-	env_LEVEL = "LEVEL"
-	env_MONGO = "MONGO"
+	env_PORT        = "PORT"
+	env_LEVEL       = "LEVEL"
+	env_MONGO       = "MONGO"
+	env_ACCESS_KEY  = "ACCESS_KEY"
+	env_SECRET_KEY  = "SECRET_KEY"
+	env_S3_ENDPOINT = "S3_ENDPOINT"
+	env_REGION      = "REGION"
 )
 
 type Config struct {
-	Port     string
-	Level    timber.Level
-	MongoUri string
+	Port        string
+	Level       timber.Level
+	MongoUri    string
+	Access_key  string
+	Secret_key  string
+	S3_endpoint string
+	Region      string
 }
 
 func (c Config) Addr() string {
 	return fmt.Sprintf(":%v", c.Port)
+}
+
+func getEnv(env_name string) (string, error) {
+	env, ok := os.LookupEnv(env_name)
+	if !ok {
+		return "", fmt.Errorf("There is an error! No %s!!!!", env_name)
+	}
+
+	return env, nil
 }
 
 func GetConfig() (Config, error) {
@@ -34,10 +51,34 @@ func GetConfig() (Config, error) {
 		return Config{}, fmt.Errorf("failed to get log level: %v", err)
 	}
 
+	access_key, err := getEnv(env_ACCESS_KEY)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get access key: %v", err)
+	}
+
+	secret_key, err := getEnv(env_SECRET_KEY)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get secret key: %v", err)
+	}
+
+	s3_endpoint, err := getEnv(env_S3_ENDPOINT)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get S3_endpoint: %v", err)
+	}
+
+	region, err := getEnv(env_REGION)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get bucket_name: %v", err)
+	}
+
 	return Config{
-		Port:     getPort(),
-		Level:    level,
-		MongoUri: mongoUri,
+		Port:        getPort(),
+		Level:       level,
+		MongoUri:    mongoUri,
+		Access_key:  access_key,
+		Secret_key:  secret_key,
+		S3_endpoint: s3_endpoint,
+		Region:      region,
 	}, nil
 }
 
