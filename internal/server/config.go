@@ -15,6 +15,7 @@ const (
 	env_SECRET_KEY  = "SECRET_KEY"
 	env_S3_ENDPOINT = "S3_ENDPOINT"
 	env_REGION      = "REGION"
+	env_BUCKET      = "BUCKET"
 )
 
 type Config struct {
@@ -25,6 +26,7 @@ type Config struct {
 	Secret_key  string
 	S3_endpoint string
 	Region      string
+	Bucket      string
 }
 
 func (c Config) Addr() string {
@@ -71,6 +73,11 @@ func GetConfig() (Config, error) {
 		return Config{}, fmt.Errorf("failed to get bucket_name: %v", err)
 	}
 
+	bucket, err := getEnv(env_BUCKET)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get bucket_name: %v", err)
+	}
+
 	return Config{
 		Port:        getPort(),
 		Level:       level,
@@ -79,6 +86,7 @@ func GetConfig() (Config, error) {
 		Secret_key:  secret_key,
 		S3_endpoint: s3_endpoint,
 		Region:      region,
+		Bucket:      bucket,
 	}, nil
 }
 

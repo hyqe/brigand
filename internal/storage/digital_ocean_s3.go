@@ -21,26 +21,28 @@ func newS3Session(region, s3_endpoint, accessKey, secretKey string) (*session.Se
 
 type FileUploader func(file io.Reader, filename string) error
 
-func s3FileUploader(sess *session.Session, file io.Reader, filename string) error {
+func s3FileUploader(sess *session.Session, file io.Reader, filename string, bucket string) error {
 	_, err := s3manager.NewUploader(sess).Upload(&s3manager.UploadInput{
-		Key:  aws.String(filename),
-		Body: file,
+		Key:    aws.String(filename),
+		Body:   file,
+		Bucket: aws.String(bucket),
 	})
 
 	return err
 }
 
-func NewS3FileUploader(sess *session.Session) FileUploader {
+func NewS3FileUploader(sess *session.Session, bucket string) FileUploader {
 	return func(file io.Reader, filename string) error {
-		return s3FileUploader(sess, file, filename)
+		return s3FileUploader(sess, file, filename, bucket)
 	}
 }
 
 type FileDownloader func(file io.Writer, filename string) error
 
-func s3FileDownloader(sess *session.Session, file io.Writer, filename string) error {
+func s3FileDownloader(sess *session.Session, file io.Writer, filename string, bucket string) error {
 	r, err := s3.New(sess).GetObject(&s3.GetObjectInput{
-		Key: aws.String(filename),
+		Key:    aws.String(filename),
+		Bucket: aws.String(bucket),
 	})
 	if err != nil {
 		return err
@@ -51,8 +53,8 @@ func s3FileDownloader(sess *session.Session, file io.Writer, filename string) er
 	return err
 }
 
-func NewS3FileDownloader(s3Sess *session.Session) FileDownloader {
+func NewS3FileDownloader(s3Sess *session.Session, bucket string) FileDownloader {
 	return func(file io.Writer, filename string) error {
-		return s3FileDownloader(s3Sess, file, filename)
+		return s3FileDownloader(s3Sess, file, filename, bucket)
 	}
 }
