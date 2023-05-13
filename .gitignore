@@ -21,7 +21,7 @@
 go.work
 
 # PRE-COMPILED
-internal/handlers/docs.html
+openapi.html
 
 # IDE
 .vscode
