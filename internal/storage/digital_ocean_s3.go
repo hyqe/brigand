@@ -51,8 +51,8 @@ func s3FileDownloader(sess *session.Session, file io.Writer, filename string) er
 	return err
 }
 
-func NewS3FileDownloader(sess *session.Session) FileDownloader {
+func NewS3FileDownloader(s3Sess *session.Session) FileDownloader {
 	return func(file io.Writer, filename string) error {
-		return s3FileDownloader(sess, file, filename)
+		return s3FileDownloader(s3Sess, file, filename)
 	}
 }
