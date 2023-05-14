@@ -9,7 +9,7 @@ import (
 	"io"
 )
 
-func newS3Session(region, s3_endpoint, accessKey, secretKey string) (*session.Session, error) {
+func NewS3Session(region, s3_endpoint, accessKey, secretKey string) (*session.Session, error) {
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region:      aws.String(region),
 		Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
@@ -48,7 +48,7 @@ func s3FileDownloader(sess *session.Session, file io.Writer, filename string, bu
 		return err
 	}
 
-	io.Copy(file, r.Body)
+	_, err = io.Copy(file, r.Body)
 
 	return err
 }

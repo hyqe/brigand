@@ -27,8 +27,14 @@ func Run(ctx context.Context) {
 	}
 	defer mongoClient.Disconnect(ctx)
 
+	s3Sess, err := storage.NewS3Session(cfg.Region, cfg.S3_endpoint, cfg.Access_key, cfg.Secret_key)
+	if err != nil {
+		panic(err)
+	}
+
 	routes := Routes(
 		storage.NewMongoMetadataClient(mongoClient),
+		storage.NewS3FileDownloader(s3Sess, cfg.Bucket),
 	)
 
 	log := timber.NewMiddleware()

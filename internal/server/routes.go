@@ -11,6 +11,8 @@ import (
 // Routes defines all the routes this service offers
 func Routes(
 	metadataClient storage.MetadataClient,
+	fileDownloader storage.FileDownloader,
+
 ) http.Handler {
 	r := mux.NewRouter()
 
@@ -23,7 +25,7 @@ func Routes(
 		Methods(http.MethodPost)
 
 	// get a file by its Id.
-	r.HandleFunc("/files/{fileId}", handlers.NewGetFileById(metadataClient)).
+	r.HandleFunc("/files/{fileId}", handlers.NewGetFileById(metadataClient, fileDownloader)).
 		Methods(http.MethodGet).
 		Queries()
 
