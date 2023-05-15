@@ -3,7 +3,9 @@ package handlers_test
 import (
 	"bytes"
 	"context"
+	"github.com/aws/aws-sdk-go/aws"
 
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/hyqe/brigand/internal/handlers"
 	"github.com/hyqe/brigand/internal/storage"
 
@@ -67,6 +69,21 @@ func createFile(s3sess *session.Session, filename string, file io.Reader, bucket
 	return err
 }
 
+func deleteImage(filename string, s3Sess *session.Session) error {
+	bucket, err := getEnv("BUCKET")
+	if err != nil {
+		return err
+	}
+
+	s3Client := s3.New(s3Sess)
+	_, err = s3Client.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(filename),
+	})
+
+	return err
+}
+
 func Test_GetFile_happy_path(t *testing.T) {
 	MONGO, ok := os.LookupEnv("MONGO")
 	if !ok {
@@ -121,4 +138,5 @@ func Test_GetFile_happy_path(t *testing.T) {
 
 	// TODO: Add Clean-Up function to delete the file that was written durring
 	// // the test to the S3
+	require.NoError(t, deleteImage(md.Id, s3sess))
 }
