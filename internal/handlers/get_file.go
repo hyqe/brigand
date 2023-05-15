@@ -23,13 +23,14 @@ func NewGetFileById(
 		ctx := context.Background()
 		md, err := metadataClient.GetById(ctx, fileId)
 		if err != nil {
-			http.Error(w, "", http.StatusBadRequest)
+			http.Error(w, "", http.StatusNotFound)
 			return
 		}
 
 		err = fileDownloader(w, md.Id)
 		if err != nil {
 			http.Error(w, "", http.StatusNotFound)
+			return
 		}
 
 		w.Header().Set("name", md.FileName)

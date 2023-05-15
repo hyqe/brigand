@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/google/uuid"
 	"github.com/hyqe/brigand/internal/handlers"
 	"github.com/hyqe/brigand/internal/storage"
 
@@ -134,9 +135,57 @@ func Test_GetFile_happy_path(t *testing.T) {
 	require.True(t, bytes.Equal(file, newfile))
 
 	// Clean Up
+	// // Delete from mongodb
 	require.NoError(t, mdClient.DeleteById(ctx, md.Id))
-
-	// TODO: Add Clean-Up function to delete the file that was written durring
-	// // the test to the S3
+	// // Delete from S3/spaces
 	require.NoError(t, deleteImage(md.Id, s3sess))
+}
+
+// Test_GetFile_happy_path(t *testing.T) {
+func Test_GetFileById_bad_file_id(t *testing.T) {
+	MONGO, ok := os.LookupEnv("MONGO")
+	require.True(t, ok)
+
+	BUCKET, ok := os.LookupEnv("BUCKET")
+	require.True(t, ok)
+
+	// Get a Mongo Client
+	ctx := context.Background()
+	mongoClient, err := storage.NewMongoClient(ctx, MONGO)
+	require.NoError(t, err)
+	defer mongoClient.Disconnect(ctx)
+
+	// Get Metadata Client
+	mdClient := storage.NewMongoMetadataClient(mongoClient)
+
+	// // INSERT into a record into MongoDb
+	md := storage.NewMetadata("Ryujin-Breaker")
+	require.NoError(t, mdClient.Create(ctx, md))
+
+	// // CLEANUP: Delete from mongodb
+	defer require.NoError(t, mdClient.DeleteById(ctx, md.Id))
+
+	// Create a S3/D.O. Spaces Session
+	s3sess, err := testSession()
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	// INSERT a File into S3/Digital Ocean Spaces
+	file := []byte("string")
+	reader := bytes.NewReader(file)
+	require.NoError(t, createFile(s3sess, md.Id, reader, BUCKET))
+
+	// // CLEANUP: Delete from S3/spaces
+	defer require.NoError(t, deleteImage(md.Id, s3sess))
+
+	// Get File from S3/D.O. Spaces
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/files/{fileId}", nil)
+	// Use a bad ID
+	r = mux.SetURLVars(r, map[string]string{"fileId": uuid.New().String()})
+	handlers.NewGetFileById(mdClient, storage.NewS3FileDownloader(s3sess, BUCKET)).ServeHTTP(w, r)
+
+	// Check the response
+	require.Equal(t, 404, w.Result().StatusCode)
 }
