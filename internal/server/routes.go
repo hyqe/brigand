@@ -25,9 +25,13 @@ func Routes(
 		Methods(http.MethodPost)
 
 	// get a file by its Id.
-	r.HandleFunc("/files/{fileId}", handlers.NewGetFileById(metadataClient, fileDownloader)).
+	r.HandleFunc("/files/{fileId}", handlers.NewGetFileById(metadataClient, fileDownloader, getFileId)).
 		Methods(http.MethodGet).
 		Queries()
 
 	return r
+}
+
+func getFileId(r *http.Request) string {
+	return mux.Vars(r)["fileId"]
 }

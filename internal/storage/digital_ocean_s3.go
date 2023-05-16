@@ -58,10 +58,3 @@ func NewS3FileDownloader(s3Sess *session.Session, bucket string) FileDownloader 
 		return s3FileDownloader(s3Sess, file, filename, bucket)
 	}
 }
-
-// MOCK: Mock all the things
-func MockNewS3FileDownloader(err error) FileDownloader {
-	return func(file io.Writer, filename string) error {
-		return err
-	}
-}
