@@ -4,21 +4,19 @@ import (
 	"net/http"
 
 	"context"
-	"github.com/gorilla/mux"
+
 	"github.com/hyqe/brigand/internal/storage"
 )
-
-func getVar(r *http.Request, var_name string) string {
-	return mux.Vars(r)[var_name]
-}
 
 func NewGetFileById(
 	metadataClient storage.MetadataClient,
 	fileDownloader storage.FileDownloader,
+	getRequestFileId func(r *http.Request) string,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO: https://github.com/hyqe/brigand/issues/3
-		fileId := getVar(r, "fileId")
+		//fileId := getVar(r, "fileId")
+		fileId := getRequestFileId(r)
 
 		ctx := context.Background()
 		md, err := metadataClient.GetById(ctx, fileId)
