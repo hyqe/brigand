@@ -31,7 +31,7 @@ func (m *MockMetadataClient) Create(ctx context.Context, md *Metadata) error {
 	return m.CreateFunc(ctx, md)
 }
 func (m *MockMetadataClient) GetById(ctx context.Context, id string) (*Metadata, error) {
-	return m.GetById(ctx, id)
+	return NewMetadata(id), nil
 }
 
 func (m *MockMetadataClient) DeleteById(ctx context.Context, id string) error {
