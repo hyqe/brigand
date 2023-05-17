@@ -35,7 +35,6 @@ func Test_GetFile_happy_path(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/files/{fileId}", nil)
-	r = mux.SetURLVars(r, map[string]string{"fileId": md.Id})
 	handlers.NewGetFileById(mockMetadataClient, mockFileDownloader, mockGetFileId).ServeHTTP(w, r)
 
 	require.Equal(t, http.StatusOK, w.Code)
@@ -58,8 +57,7 @@ func Test_GetFileById_bad_file_id(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/files/{fileId}", nil)
-	r = mux.SetURLVars(r, map[string]string{"fileId": "badid"})
 	handlers.NewGetFileById(mockMetaDataClient, mockFileDownloader, mockGetFileId).ServeHTTP(w, r)
 
-	require.Equal(t, 404, w.Result().StatusCode)
+	require.Equal(t, http.StatusNotFound, w.Code)
 }
