@@ -5,7 +5,6 @@ import (
 	"github.com/hyqe/brigand/internal/storage"
 
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
@@ -30,11 +29,11 @@ func Test_GetFile_happy_path(t *testing.T) {
 		return nil
 	}
 	mockGetFileId := func(r *http.Request) string {
-		return mux.Vars(r)["fileId"]
+		return md.Id
 	}
 
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, "/files/{fileId}", nil)
+	r := httptest.NewRequest(http.MethodGet, "/", nil)
 	handlers.NewGetFileById(mockMetadataClient, mockFileDownloader, mockGetFileId).ServeHTTP(w, r)
 
 	require.Equal(t, http.StatusOK, w.Code)
