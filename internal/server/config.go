@@ -8,19 +8,38 @@ import (
 )
 
 const (
-	env_PORT  = "PORT"
-	env_LEVEL = "LEVEL"
-	env_MONGO = "MONGO"
+	env_PORT                 = "PORT"
+	env_LEVEL                = "LEVEL"
+	env_MONGO                = "MONGO"
+	env_DO_SPACES_ACCESS_KEY = "DO_SPACES_ACCESS_KEY"
+	env_DO_SPACES_SECRET_KEY = "DO_SPACES_SECRET_KEY"
+	env_DO_SPACES_ENDPOINT   = "DO_SPACES_ENDPOINT"
+	env_DO_SPACES_REGION     = "DO_SPACES_REGION"
+	env_DO_SPACES_BUCKET     = "DO_SPACES_BUCKET"
 )
 
 type Config struct {
-	Port     string
-	Level    timber.Level
-	MongoUri string
+	Port              string
+	Level             timber.Level
+	MongoUri          string
+	DOSpacesAccessKey string
+	DOSpacesSecretKey string
+	DOSpacesEndpoint  string
+	DOSpacesRegion    string
+	DOSpacesBucket    string
 }
 
 func (c Config) Addr() string {
 	return fmt.Sprintf(":%v", c.Port)
+}
+
+func getEnv(env_name string) (string, error) {
+	env, ok := os.LookupEnv(env_name)
+	if !ok {
+		return "", fmt.Errorf("There is an error! No %s!!!!", env_name)
+	}
+
+	return env, nil
 }
 
 func GetConfig() (Config, error) {
@@ -34,10 +53,40 @@ func GetConfig() (Config, error) {
 		return Config{}, fmt.Errorf("failed to get log level: %v", err)
 	}
 
+	doAccessKey, err := getEnv(env_DO_SPACES_ACCESS_KEY)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get access key: %v", err)
+	}
+
+	doSecretKey, err := getEnv(env_DO_SPACES_SECRET_KEY)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get secret key: %v", err)
+	}
+
+	doEndpoint, err := getEnv(env_DO_SPACES_ENDPOINT)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get S3_endpoint: %v", err)
+	}
+
+	doRegion, err := getEnv(env_DO_SPACES_REGION)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get bucket_name: %v", err)
+	}
+
+	doBucket, err := getEnv(env_DO_SPACES_BUCKET)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get bucket_name: %v", err)
+	}
+
 	return Config{
-		Port:     getPort(),
-		Level:    level,
-		MongoUri: mongoUri,
+		Port:              getPort(),
+		Level:             level,
+		MongoUri:          mongoUri,
+		DOSpacesAccessKey: doSecretKey,
+		DOSpacesSecretKey: doAccessKey,
+		DOSpacesEndpoint:  doEndpoint,
+		DOSpacesRegion:    doRegion,
+		DOSpacesBucket:    doBucket,
 	}, nil
 }
 
