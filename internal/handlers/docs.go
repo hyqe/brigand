@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 )
-
 func NewGetDocs(filename string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		f, err := os.Open(filename)

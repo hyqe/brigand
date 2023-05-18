@@ -48,7 +48,12 @@ func s3FileDownloader(sess *session.Session, file io.Writer, filename string, bu
 		return err
 	}
 
-	io.Copy(file, r.Body)
+	_, err = io.Copy(file, r.Body)
+	if err != nil {
+		return err
+	}
+
+	err = r.Body.Close()
 
 	return err
 }

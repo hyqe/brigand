@@ -24,14 +24,15 @@ func NewMongoMetadataClient(c *mongo.Client) MetadataClient {
 // MockMetadataClient is a mock of MetadataClient which can be
 // used by tests.
 type MockMetadataClient struct {
-	CreateFunc func(ctx context.Context, md *Metadata) error
+	CreateFunc  func(ctx context.Context, md *Metadata) error
+	GetFileById func(ctx context.Context, id string) (*Metadata, error)
 }
 
 func (m *MockMetadataClient) Create(ctx context.Context, md *Metadata) error {
 	return m.CreateFunc(ctx, md)
 }
 func (m *MockMetadataClient) GetById(ctx context.Context, id string) (*Metadata, error) {
-	return m.GetById(ctx, id)
+	return m.GetFileById(ctx, id)
 }
 
 func (m *MockMetadataClient) DeleteById(ctx context.Context, id string) error {
