@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/hyqe/timber"
@@ -16,6 +17,8 @@ const (
 	env_S3_ENDPOINT = "S3_ENDPOINT"
 	env_REGION      = "REGION"
 	env_BUCKET      = "BUCKET"
+	env_PASSWORD    = "PASSWORD"
+	env_USERNAME    = "USERNAME"
 )
 
 type Config struct {
@@ -27,6 +30,7 @@ type Config struct {
 	S3_endpoint string
 	Region      string
 	Bucket      string
+	Sudo        Credentials
 }
 
 func (c Config) Addr() string {
@@ -78,6 +82,21 @@ func GetConfig() (Config, error) {
 		return Config{}, fmt.Errorf("failed to get bucket_name: %v", err)
 	}
 
+	username, err := getEnv(env_USERNAME)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get username: %v", err)
+	}
+
+	password, err := getEnv(env_PASSWORD)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get password: %v", err)
+	}
+
+	sudo := Credentials{
+		username: username,
+		password: password,
+	}
+
 	return Config{
 		Port:        getPort(),
 		Level:       level,
@@ -87,6 +106,7 @@ func GetConfig() (Config, error) {
 		S3_endpoint: s3_endpoint,
 		Region:      region,
 		Bucket:      bucket,
+		Sudo:        sudo,
 	}, nil
 }
 
@@ -115,4 +135,28 @@ func getLogLevel() (timber.Level, error) {
 		return timber.ParseLevel(LEVEL), nil
 	}
 	return timber.DEBUG, nil
+}
+
+type Credentials struct {
+	username string
+	password string
+}
+
+func SudoMiddlware(sudo Credentials) func(next http.Handler) http.HandlerFunc {
+	return func(next http.Handler) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			username, password, ok := r.BasicAuth()
+
+			if ok {
+				if username == sudo.username && password == sudo.password {
+					next.ServeHTTP(w, r)
+				} else {
+					http.Error(w, "you are not authorized", http.StatusUnauthorized)
+				}
+				return
+			}
+
+			http.Error(w, "no authorization tokens", http.StatusUnauthorized)
+		}
+	}
 }

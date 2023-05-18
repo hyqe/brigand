@@ -39,9 +39,11 @@ func Run(ctx context.Context) {
 
 	log := timber.NewMiddleware()
 
+	sudo := SudoMiddlware(cfg.Sudo)
+
 	graceful(ctx, &http.Server{
 		Addr:    cfg.Addr(),
-		Handler: log(routes),
+		Handler: log(sudo(routes)),
 	})
 }
 
