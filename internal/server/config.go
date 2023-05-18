@@ -8,25 +8,25 @@ import (
 )
 
 const (
-	env_PORT        = "PORT"
-	env_LEVEL       = "LEVEL"
-	env_MONGO       = "MONGO"
-	env_ACCESS_KEY  = "ACCESS_KEY"
-	env_SECRET_KEY  = "SECRET_KEY"
-	env_S3_ENDPOINT = "S3_ENDPOINT"
-	env_REGION      = "REGION"
-	env_BUCKET      = "BUCKET"
+	env_PORT                 = "PORT"
+	env_LEVEL                = "LEVEL"
+	env_MONGO                = "MONGO"
+	env_DO_SPACES_ACCESS_KEY = "DO_SPACES_ACCESS_KEY"
+	env_DO_SPACES_SECRET_KEY = "DO_SPACES_SECRET_KEY"
+	env_DO_SPACES_ENDPOINT   = "DO_SPACES_ENDPOINT"
+	env_DO_SPACES_REGION     = "DO_SPACES_REGION"
+	env_DO_SPACES_BUCKET     = "DO_SPACES_BUCKET"
 )
 
 type Config struct {
-	Port        string
-	Level       timber.Level
-	MongoUri    string
-	Access_key  string
-	Secret_key  string
-	S3_endpoint string
-	Region      string
-	Bucket      string
+	Port              string
+	Level             timber.Level
+	MongoUri          string
+	DOSpacesAccessKey string
+	DOSpacesSecretKey string
+	DOSpacesEndpoint  string
+	DOSpacesRegion    string
+	DOSpacesBucket    string
 }
 
 func (c Config) Addr() string {
@@ -53,40 +53,40 @@ func GetConfig() (Config, error) {
 		return Config{}, fmt.Errorf("failed to get log level: %v", err)
 	}
 
-	access_key, err := getEnv(env_ACCESS_KEY)
+	doAccessKey, err := getEnv(env_DO_SPACES_ACCESS_KEY)
 	if err != nil {
 		return Config{}, fmt.Errorf("failed to get access key: %v", err)
 	}
 
-	secret_key, err := getEnv(env_SECRET_KEY)
+	doSecretKey, err := getEnv(env_DO_SPACES_SECRET_KEY)
 	if err != nil {
 		return Config{}, fmt.Errorf("failed to get secret key: %v", err)
 	}
 
-	s3_endpoint, err := getEnv(env_S3_ENDPOINT)
+	doEndpoint, err := getEnv(env_DO_SPACES_ENDPOINT)
 	if err != nil {
 		return Config{}, fmt.Errorf("failed to get S3_endpoint: %v", err)
 	}
 
-	region, err := getEnv(env_REGION)
+	doRegion, err := getEnv(env_DO_SPACES_REGION)
 	if err != nil {
 		return Config{}, fmt.Errorf("failed to get bucket_name: %v", err)
 	}
 
-	bucket, err := getEnv(env_BUCKET)
+	doBucket, err := getEnv(env_DO_SPACES_BUCKET)
 	if err != nil {
 		return Config{}, fmt.Errorf("failed to get bucket_name: %v", err)
 	}
 
 	return Config{
-		Port:        getPort(),
-		Level:       level,
-		MongoUri:    mongoUri,
-		Access_key:  access_key,
-		Secret_key:  secret_key,
-		S3_endpoint: s3_endpoint,
-		Region:      region,
-		Bucket:      bucket,
+		Port:              getPort(),
+		Level:             level,
+		MongoUri:          mongoUri,
+		DOSpacesAccessKey: doSecretKey,
+		DOSpacesSecretKey: doAccessKey,
+		DOSpacesEndpoint:  doEndpoint,
+		DOSpacesRegion:    doRegion,
+		DOSpacesBucket:    doBucket,
 	}, nil
 }
 

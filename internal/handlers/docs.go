@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-//go:embed docs.html
 var docs string
 
 func GetDocs(w http.ResponseWriter, r *http.Request) {
