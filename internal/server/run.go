@@ -32,10 +32,11 @@ func Run(ctx context.Context) {
 	)
 
 	log := timber.NewMiddleware()
+	max := MaxUpload(Megabyte * 100)
 
 	graceful(ctx, &http.Server{
 		Addr:    cfg.Addr(),
-		Handler: log(routes),
+		Handler: log(max(routes)),
 	})
 }
 
