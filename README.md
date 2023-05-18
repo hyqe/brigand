@@ -13,7 +13,7 @@ MONGO="mongodb://localhost:27017" \
 Run locally using Docker compose. suitable for testing only.
 
 ```sh
-docker compose -f ./scripts/docker-compose-local.yaml --project-directory . up
+docker compose -f ./scripts/docker-compose-local.yaml --project-directory . up  --build
 
 # ctrl+c to stop
 docker compose -f scripts/docker-compose-local.yaml  --project-directory . down

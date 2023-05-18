@@ -1,15 +1,19 @@
 package handlers
 
 import (
-	_ "embed"
-	"fmt"
+	"io"
 	"net/http"
+	"os"
 )
-
-// go:embed docs.html
-var docs string
-
-func GetDocs(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	fmt.Fprint(w, docs)
+func NewGetDocs(filename string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		f, err := os.Open(filename)
+		if err != nil {
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		io.Copy(w, f)
+		f.Close()
+	}
 }

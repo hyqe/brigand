@@ -3,4 +3,4 @@
 set -ex
 
 # requires nodejs installed: https://nodejs.org
-npx @redocly/cli build-docs openapi.yaml -o internal/handlers/docs.html
+npx @redocly/cli build-docs openapi.yaml -o openapi.html
