@@ -17,6 +17,8 @@ const (
 	env_DO_SPACES_ENDPOINT   = "DO_SPACES_ENDPOINT"
 	env_DO_SPACES_REGION     = "DO_SPACES_REGION"
 	env_DO_SPACES_BUCKET     = "DO_SPACES_BUCKET"
+	env_SUDO_PASSWORD        = "SUDO_PASSWORD"
+	env_SUDO_USERNAME        = "SUDO_USERNAME"
 )
 
 type Config struct {
@@ -28,6 +30,7 @@ type Config struct {
 	DOSpacesEndpoint  string
 	DOSpacesRegion    string
 	DOSpacesBucket    string
+	Sudo              Credentials
 }
 
 func (c Config) Addr() string {
@@ -79,6 +82,21 @@ func GetConfig() (Config, error) {
 		return Config{}, fmt.Errorf("failed to get bucket_name: %v", err)
 	}
 
+	sudoPassword, err := getEnv(env_SUDO_PASSWORD)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get sudo password: %v", err)
+	}
+
+	sudoUsername, err := getEnv(env_SUDO_USERNAME)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get sudo username: %v", err)
+	}
+
+	sudo := Credentials{
+		Username: sudoUsername,
+		Password: sudoPassword,
+	}
+
 	return Config{
 		Port:              getPort(),
 		Level:             level,
@@ -88,6 +106,7 @@ func GetConfig() (Config, error) {
 		DOSpacesEndpoint:  doEndpoint,
 		DOSpacesRegion:    doRegion,
 		DOSpacesBucket:    doBucket,
+		Sudo:              sudo,
 	}, nil
 }
 
