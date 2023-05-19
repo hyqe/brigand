@@ -24,7 +24,7 @@ func Test_SudoMiddlware_missing_auth_header(t *testing.T) {
 	sudo := server.SudoMiddlware(mockCredentials)(mockHandler)
 	sudo.ServeHTTP(w, r)
 
-	require.Equal(t, http.StatusProxyAuthRequired, w.Code)
+	require.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
 func Test_SudoMiddlware_deny_request(t *testing.T) {
