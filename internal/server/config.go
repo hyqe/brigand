@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/hyqe/timber"
@@ -115,4 +116,25 @@ func getLogLevel() (timber.Level, error) {
 		return timber.ParseLevel(LEVEL), nil
 	}
 	return timber.DEBUG, nil
+}
+
+type Credentials struct {
+	Username string
+	Password string
+}
+
+func SudoMiddlware(sudo Credentials) func(next http.Handler) http.HandlerFunc {
+	return func(next http.Handler) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			switch username, password, ok := r.BasicAuth(); {
+			case username == sudo.Username && password == sudo.Password && ok:
+				next.ServeHTTP(w, r)
+				return
+			default:
+				w.Header().Set("WWW-Authenticate", "Basic")
+				http.Error(w, "no authorization tokens", http.StatusUnauthorized)
+			}
+
+		}
+	}
 }
