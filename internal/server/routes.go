@@ -12,6 +12,7 @@ import (
 func Routes(
 	metadataClient storage.MetadataClient,
 	fileDownloader storage.FileDownloader,
+	fileUploader storage.FileUploader,
 
 ) http.Handler {
 	r := mux.NewRouter()
@@ -25,7 +26,7 @@ func Routes(
 		Methods(http.MethodGet)
 
 	// store a file
-	r.HandleFunc("/files", handlers.NewCreateFile(metadataClient)).
+	r.HandleFunc("/files", handlers.NewCreateFile(metadataClient, fileUploader)).
 		Methods(http.MethodPost)
 
 	// get a file by its Id.

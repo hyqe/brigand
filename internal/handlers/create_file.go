@@ -2,41 +2,41 @@ package handlers
 
 import (
 	"encoding/json"
-	"io"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/hyqe/brigand/internal/storage"
 )
 
-// CreateFile TODO: add docs here...
 func NewCreateFile(
-	// TODO: accept db and fs interfaces here.
 	metadataClient storage.MetadataClient,
+	upload storage.FileUploader,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO:
-		// - check request content-type: multipart/form-data
-		// - store file metadata in db with unique id.
-		// - copy file to fs for using unique id as file name.
+		if r.Body == nil {
+			http.Error(w, "file content required", http.StatusBadRequest)
+			return
+		}
 
-		b, err := io.ReadAll(r.Body)
+		filename := r.URL.Query().Get("name")
+		if filename == "" {
+			http.Error(w, "filename required", http.StatusBadRequest)
+			return
+		}
+
+		md := storage.NewMetadata(filename)
+
+		err := metadataClient.Create(r.Context(), md)
 		if err != nil {
-			http.Error(w, "", http.StatusBadRequest)
-			return
-		}
-		if len(b) < 1 {
-			http.Error(w, "", http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		// TODO: metadataClient.Create(ctx, &storage.Metadata{})
+		err = upload(r.Body, md.Id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-		// TODO:
-		// - set response content-type
-		// - define CreateFileResponse struct instead of map.
-		json.NewEncoder(w).Encode(map[string]any{
-			"id": uuid.New(),
-		})
+		json.NewEncoder(w).Encode(md)
 	}
 }

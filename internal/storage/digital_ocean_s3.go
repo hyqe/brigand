@@ -1,19 +1,21 @@
 package storage
 
 import (
+	"io"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"io"
 )
 
 func NewS3Session(region, s3_endpoint, accessKey, secretKey string) (*session.Session, error) {
 	sess := session.Must(session.NewSession(&aws.Config{
-		Region:      aws.String(region),
-		Credentials: credentials.NewStaticCredentials(accessKey, secretKey, ""),
-		Endpoint:    aws.String(s3_endpoint),
+		Region:           aws.String(region),
+		Credentials:      credentials.NewStaticCredentials(accessKey, secretKey, ""),
+		Endpoint:         aws.String(s3_endpoint),
+		S3ForcePathStyle: aws.Bool(true),
 	}))
 
 	return sess, nil
