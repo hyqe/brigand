@@ -35,6 +35,7 @@ func Run(ctx context.Context) {
 	routes := Routes(
 		storage.NewMongoMetadataClient(mongoClient),
 		storage.NewS3FileDownloader(s3Sess, cfg.DOSpacesBucket),
+		storage.NewS3FileUploader(s3Sess, cfg.DOSpacesBucket),
 	)
 
 	log := timber.NewMiddleware()

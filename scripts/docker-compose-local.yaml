@@ -7,7 +7,19 @@ services:
       - MONGO=mongodb://db
       - LEVEL=DEBUG
       - PORT=80
+      - DO_SPACES_ACCESS_KEY=NONE
+      - DO_SPACES_SECRET_KEY=NONE
+      - DO_SPACES_ENDPOINT=http://s3:4566
+      - DO_SPACES_REGION=us-west-2
+      - DO_SPACES_BUCKET=default
+      - SUDO_USERNAME=foo
+      - SUDO_PASSWORD=bar
     depends_on:
       - db
   db:
     image: mongo
+
+  s3:
+    image: localstack/localstack
+    volumes:
+      - './scripts/localstack:/etc/localstack/init/ready.d'
