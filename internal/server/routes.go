@@ -13,7 +13,7 @@ func Routes(
 	metadataClient storage.MetadataClient,
 	fileDownloader storage.FileDownloader,
 	fileUploader storage.FileUploader,
-
+	hmacSecret string,
 ) http.Handler {
 	r := mux.NewRouter()
 
@@ -34,9 +34,16 @@ func Routes(
 		Methods(http.MethodGet).
 		Queries()
 
+	// return a  symlink
+	r.HandleFunc("/symlink/make", handlers.MakeSymlink(metadataClient, fileUploader, getFileIdQueryParam, hmacSecret))
+
 	return r
 }
 
 func getFileId(r *http.Request) string {
 	return mux.Vars(r)["fileId"]
+}
+
+func getFileIdQueryParam(r *http.Request) string {
+	return r.URL.Query().Get("name")
 }

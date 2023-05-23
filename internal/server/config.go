@@ -19,6 +19,7 @@ const (
 	env_DO_SPACES_BUCKET     = "DO_SPACES_BUCKET"
 	env_SUDO_PASSWORD        = "SUDO_PASSWORD"
 	env_SUDO_USERNAME        = "SUDO_USERNAME"
+	env_HMAC_SECRET          = "HMAC_SECRET"
 )
 
 type Config struct {
@@ -31,6 +32,7 @@ type Config struct {
 	DOSpacesRegion    string
 	DOSpacesBucket    string
 	Sudo              Credentials
+	HmacSecret        string
 }
 
 func (c Config) Addr() string {
@@ -97,6 +99,11 @@ func GetConfig() (Config, error) {
 		Password: sudoPassword,
 	}
 
+	hmacSecret, err := getEnv(env_HMAC_SECRET)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to get hmac secret: %v", err)
+	}
+
 	return Config{
 		Port:              getPort(),
 		Level:             level,
@@ -107,6 +114,7 @@ func GetConfig() (Config, error) {
 		DOSpacesRegion:    doRegion,
 		DOSpacesBucket:    doBucket,
 		Sudo:              sudo,
+		HmacSecret:        hmacSecret,
 	}, nil
 }
 

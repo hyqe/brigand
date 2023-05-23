@@ -36,6 +36,7 @@ func Run(ctx context.Context) {
 		storage.NewMongoMetadataClient(mongoClient),
 		storage.NewS3FileDownloader(s3Sess, cfg.DOSpacesBucket),
 		storage.NewS3FileUploader(s3Sess, cfg.DOSpacesBucket),
+		cfg.HmacSecret,
 	)
 
 	log := timber.NewMiddleware()
