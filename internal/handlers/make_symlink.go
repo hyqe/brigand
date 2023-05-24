@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	// "context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
@@ -16,14 +15,14 @@ import (
 
 func doesThisHaveFileContent(rc io.ReadCloser) bool {
 
-	byties, err := io.ReadAll(rc)
-	if err != nil {
-		return false
-	}
+	// byties, err := io.ReadAll(rc)
+	// if err != nil {
+	// 	return false
+	// }
 
-	if len(byties) < 1 {
-		return false
-	}
+	// if len(byties) < 1 {
+	// 	return false
+	// }
 
 	return true
 }
@@ -53,18 +52,18 @@ func createMetadataInDB(metadataClient storage.MetadataClient, upload storage.Fi
 }
 
 func formatSymlink(md *storage.Metadata, hmacSecret string) string {
-
-	theTime := time.Now().Add(time.Hour)
-
-	path := fmt.Sprintf("/%s?expiration=%s", md.Id, theTime)
+	// RFC3339 2006-01-02T15:04:05Z07:00
+	theTime := time.Now().Add(time.Hour).Format(time.RFC3339)
+	path := fmt.Sprintf("expiration=%s&id=%s&name=%s", theTime, md.Id, md.FileName)
 
 	h := hmac.New(sha256.New, []byte(hmacSecret))
 	_, err := h.Write([]byte(path))
 	if err != nil {
 		panic(err)
 	}
+	hash := hex.EncodeToString(h.Sum(nil))
 
-	symlink := fmt.Sprintf("https://brigand.hyqe.org/%s", hex.EncodeToString(h.Sum(nil)))
+	symlink := fmt.Sprintf("https://brigand.hyqe.org/symlink/take?hash=%s&%s", hash, path)
 
 	return symlink
 }
@@ -95,8 +94,8 @@ func MakeSymlink(
 			Link: formatSymlink(md, hmacSecret),
 		}
 
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(symlink)
 
 	}
-
 }
