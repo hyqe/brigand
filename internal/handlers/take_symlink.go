@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func checkHash(params map[string]string, hmacSecret string) bool {
+func CheckHash(params map[string]string, hmacSecret string) bool {
 	path := fmt.Sprintf("expiration=%s&id=%s&name=%s", params["expiration"], params["id"], params["name"])
 
 	h := hmac.New(sha256.New, []byte(hmacSecret))
@@ -65,7 +65,7 @@ func TakeSymlink(metadataClient storage.MetadataClient, fileDownloader storage.F
 			return
 		}
 
-		if !checkHash(params, hmacSecret) {
+		if !CheckHash(params, hmacSecret) {
 			http.Error(w, "We did not send you this link. UNACCEPTABLE!!!!", http.StatusForbidden)
 			return
 		}

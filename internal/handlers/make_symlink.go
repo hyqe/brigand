@@ -8,28 +8,29 @@ import (
 
 	"fmt"
 	"github.com/hyqe/brigand/internal/storage"
-	"io"
+	// "io"
 	"net/http"
 	"time"
 )
 
-func doesThisHaveFileContent(rc io.ReadCloser) bool {
+// func doesThisHaveFileContent(rc io.ReadCloser) bool {
 
-	// byties, err := io.ReadAll(rc)
-	// if err != nil {
-	// 	return false
-	// }
+// 	byties, err := io.ReadAll(rc)
+// 	if err != nil {
+// 		return false
+// 	}
 
-	// if len(byties) < 1 {
-	// 	return false
-	// }
+// 	if len(byties) < 1 {
+// 		return false
+// 	}
 
-	return true
-}
+// 	return true
+// }
 
 func createMetadataInDB(metadataClient storage.MetadataClient, upload storage.FileUploader, getFileName func(r *http.Request) string, w http.ResponseWriter, r *http.Request) (*storage.Metadata, error) {
 
-	if r.Body == nil || !doesThisHaveFileContent(r.Body) {
+	//if r.Body == nil || !doesThisHaveFileContent(r.Body) {
+	if r.Body == nil || r.ContentLength < 1 {
 		http.Error(w, "file content required", http.StatusBadRequest)
 		return nil, fmt.Errorf("File content is nothing")
 	}

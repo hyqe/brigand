@@ -51,13 +51,6 @@ func getFileIdQueryParam(r *http.Request) string {
 	return r.URL.Query().Get("name")
 }
 
-type SymlinkParams struct {
-	hash       string
-	expiration string
-	id         string
-	name       string
-}
-
 func symlinkParams(r *http.Request) map[string]string {
 
 	mappy := make(map[string]string)
