@@ -50,7 +50,7 @@ func timeError(oldTime string) string {
 	return fmt.Sprintf("your symlink has expired: symlink's time: <%s> || Time of request process: <%s>", old, now)
 }
 
-func TakeSymlink(metadataClient storage.MetadataClient, fileDownloader storage.FileDownloader, hmacSecret string, getParams func(r *http.Request) map[string]string) http.HandlerFunc {
+func TakeSymlink(fileDownloader storage.FileDownloader, hmacSecret string, getParams func(r *http.Request) map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := getParams(r)
 

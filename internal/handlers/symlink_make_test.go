@@ -14,7 +14,7 @@ import (
 	"testing"
 )
 
-func symlinkParams(r *http.Request) map[string]string {
+func SymlinkParams(r *http.Request) map[string]string {
 
 	mappy := make(map[string]string)
 	mappy["hash"] = r.URL.Query().Get("hash")
@@ -63,7 +63,7 @@ func Test_MakeSymlink_happy_path(t *testing.T) {
 	require.NoError(t, err)
 
 	// Check if it gets the correct amount of params
-	params := symlinkParams(httptest.NewRequest(http.MethodGet, symlink.Link, nil))
+	params := SymlinkParams(httptest.NewRequest(http.MethodGet, symlink.Link, nil))
 	require.GreaterOrEqual(t, len(params), 4)
 
 	// Check if the link originated from us by comparing the hashes

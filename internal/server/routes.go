@@ -35,10 +35,10 @@ func Routes(
 		Queries()
 
 	// return a  symlink
-	r.HandleFunc("/symlink/make", handlers.MakeSymlink(metadataClient, fileUploader, getFileIdQueryParam, hmacSecret))
+	r.HandleFunc("/symlink/make", handlers.MakeSymlink(metadataClient, fileUploader, getFileIdQueryParam, hmacSecret)).Methods(http.MethodGet)
 
 	// return a file from symlink
-	r.HandleFunc("/symlink/take", handlers.TakeSymlink(metadataClient, fileDownloader, hmacSecret, symlinkParams))
+	r.HandleFunc("/symlink/take", handlers.TakeSymlink(fileDownloader, hmacSecret, symlinkParams)).Methods(http.MethodGet)
 
 	return r
 }
