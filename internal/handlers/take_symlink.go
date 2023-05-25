@@ -11,8 +11,8 @@ import (
 	"time"
 )
 
-func CheckHash(params map[string]string, hmacSecret string) bool {
-	path := fmt.Sprintf("expiration=%s&id=%s&name=%s", params["expiration"], params["id"], params["name"])
+func CheckSymlinkHash(symlink *storage.Symlink, hmacSecret string) bool {
+	path := fmt.Sprintf("expiration=%s&id=%s&name=%s", symlink.Expiration, symlink.Id, symlink.Name)
 
 	h := hmac.New(sha256.New, []byte(hmacSecret))
 	_, err := h.Write([]byte(path))
@@ -20,7 +20,7 @@ func CheckHash(params map[string]string, hmacSecret string) bool {
 		panic(err)
 	}
 	newhash := hex.EncodeToString(h.Sum(nil))
-	if newhash == params["hash"] {
+	if newhash == symlink.Hash {
 		return true
 	}
 	return false
@@ -50,30 +50,29 @@ func timeError(oldTime string) string {
 	return fmt.Sprintf("your symlink has expired: symlink's time: <%s> || Time of request process: <%s>", old, now)
 }
 
-func TakeSymlink(fileDownloader storage.FileDownloader, hmacSecret string, getParams func(r *http.Request) map[string]string) http.HandlerFunc {
+func TakeSymlink(fileDownloader storage.FileDownloader, symlinkSecret string, getSymlink func(r *http.Request) *storage.Symlink) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		params := getParams(r)
+		symlink := getSymlink(r)
 
-		isExpired, err := checkIfSymlinkIsExpired(params["expiration"])
+		isExpired, err := checkIfSymlinkIsExpired(symlink.Expiration)
 		if err != nil {
 			http.Error(w, "The Time string could not be parsed back into a time.Time object", http.StatusInternalServerError)
 			return
 		}
 		if isExpired {
 			// TODO: return the time of the symlink in human-readable & the current time right now
-			http.Error(w, timeError(params["expiration"]), http.StatusNotAcceptable)
+			http.Error(w, timeError(symlink.Expiration), http.StatusNotAcceptable)
 			return
 		}
 
-		if !CheckHash(params, hmacSecret) {
+		if !CheckSymlinkHash(symlink, symlinkSecret) {
 			http.Error(w, "We did not send you this link. UNACCEPTABLE!!!!", http.StatusForbidden)
 			return
 		}
 
-		err = fileDownloader(w, params["id"])
+		err = fileDownloader(w, symlink.Id)
 		if err != nil {
 			http.Error(w, "Failed to retrieve your file by the given id in the url parameter", http.StatusInternalServerError)
 		}
 	}
 }
- 

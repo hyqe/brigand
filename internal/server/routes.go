@@ -13,7 +13,7 @@ func Routes(
 	metadataClient storage.MetadataClient,
 	fileDownloader storage.FileDownloader,
 	fileUploader storage.FileUploader,
-	hmacSecret string,
+	symlinkSecret string,
 ) http.Handler {
 	r := mux.NewRouter()
 
@@ -35,10 +35,10 @@ func Routes(
 		Queries()
 
 	// return a  symlink
-	r.HandleFunc("/symlink/make", handlers.MakeSymlink(metadataClient, fileUploader, getFileIdQueryParam, hmacSecret)).Methods(http.MethodGet)
+	r.HandleFunc("/symlink/make/{name}", handlers.MakeSymlink(metadataClient, fileUploader, getFileIdQueryParam, symlinkSecret)).Methods(http.MethodPost)
 
 	// return a file from symlink
-	r.HandleFunc("/symlink/take", handlers.TakeSymlink(fileDownloader, hmacSecret, symlinkParams)).Methods(http.MethodGet)
+	r.HandleFunc("/symlink/take/{name}", handlers.TakeSymlink(fileDownloader, symlinkSecret, storage.SymlinkFromQuery)).Methods(http.MethodGet)
 
 	return r
 }
@@ -49,15 +49,4 @@ func getFileId(r *http.Request) string {
 
 func getFileIdQueryParam(r *http.Request) string {
 	return r.URL.Query().Get("name")
-}
-
-func symlinkParams(r *http.Request) map[string]string {
-
-	mappy := make(map[string]string)
-	mappy["hash"] = r.URL.Query().Get("hash")
-	mappy["expiration"] = r.URL.Query().Get("expiration")
-	mappy["id"] = r.URL.Query().Get("id")
-	mappy["name"] = r.URL.Query().Get("name")
-
-	return mappy
 }

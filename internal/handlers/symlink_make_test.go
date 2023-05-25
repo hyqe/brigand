@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	// "fmt"
+	"github.com/gorilla/mux"
 	"github.com/hyqe/brigand/internal/handlers"
 	"github.com/hyqe/brigand/internal/storage"
 	"github.com/stretchr/testify/require"
@@ -14,22 +14,11 @@ import (
 	"testing"
 )
 
-func SymlinkParams(r *http.Request) map[string]string {
-
-	mappy := make(map[string]string)
-	mappy["hash"] = r.URL.Query().Get("hash")
-	mappy["expiration"] = r.URL.Query().Get("expiration")
-	mappy["id"] = r.URL.Query().Get("id")
-	mappy["name"] = r.URL.Query().Get("name")
-
-	return mappy
-}
-
 func Test_MakeSymlink_happy_path(t *testing.T) {
 	fc := []byte("FileContent")
 	fileContent := bytes.NewBuffer(fc)
 
-	hmacSecret := "MySecret"
+	symlinkSecret := "MySecret"
 	mockMetadataClient := &storage.MockMetadataClient{
 		CreateFunc: func(ctx context.Context, md *storage.Metadata) error {
 			return nil
@@ -49,42 +38,41 @@ func Test_MakeSymlink_happy_path(t *testing.T) {
 	}
 
 	getFileId := func(r *http.Request) string {
-		return r.URL.Query().Get("name")
+		return mux.Vars(r)["name"]
 	}
 
-	path := "/symlink/make?name=Breaker"
+	path := "/"
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, path, fileContent)
+	r := httptest.NewRequest(http.MethodPost, path, fileContent)
 
-	handlers.MakeSymlink(mockMetadataClient, mockFileUploader, getFileId, hmacSecret).ServeHTTP(w, r)
+	r = mux.SetURLVars(r, map[string]string{"name": "breaker"})
 
-	var symlink handlers.Symlink
-	err := json.NewDecoder(w.Body).Decode(&symlink)
+	handlers.MakeSymlink(mockMetadataClient, mockFileUploader, getFileId, symlinkSecret).ServeHTTP(w, r)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	handlerGeneratedSymlink := &storage.Symlink{}
+	err := json.NewDecoder(w.Body).Decode(handlerGeneratedSymlink)
 	require.NoError(t, err)
 
-	// Check if it gets the correct amount of params
-	params := SymlinkParams(httptest.NewRequest(http.MethodGet, symlink.Link, nil))
-	require.GreaterOrEqual(t, len(params), 4)
+	fakeR := httptest.NewRequest(http.MethodPost, handlerGeneratedSymlink.Link, nil)
+	symlink := storage.SymlinkFromQuery(fakeR)
+	symlink.Name = "breaker"
 
-	// Check if the link originated from us by comparing the hashes
-	require.True(t, handlers.CheckHash(params, hmacSecret))
-
+	require.True(t, handlers.CheckSymlinkHash(symlink, symlinkSecret))
 	require.Equal(t, http.StatusOK, w.Code)
 }
 
 func Test_MakeSymlink_no_file_content(t *testing.T) {
-	hmacSecret := "MySecret"
+	symlinkSecret := "MySecret"
 	mockMetadataClient := &storage.MockMetadataClient{
 		CreateFunc: func(ctx context.Context, md *storage.Metadata) error {
 			return nil
 		},
 	}
 
-	// mockFileUploader := func(file io.Reader, filename string) error {
-	// // require.Equal(t, nil, file)
-	// // return fmt.Errorf("")
-	// return nil
-	// }
+	mockFileUploader := func(file io.Reader, filename string) error {
+		return nil
+	}
 
 	getFileId := func(r *http.Request) string {
 		return r.URL.Query().Get("name")
@@ -92,9 +80,9 @@ func Test_MakeSymlink_no_file_content(t *testing.T) {
 
 	path := "/symlink/make?name=Breaker"
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, path, nil)
+	r := httptest.NewRequest(http.MethodPost, path, nil)
 
-	handlers.MakeSymlink(mockMetadataClient, nil, getFileId, hmacSecret).ServeHTTP(w, r)
+	handlers.MakeSymlink(mockMetadataClient, mockFileUploader, getFileId, symlinkSecret).ServeHTTP(w, r)
 
 	require.Equal(t, http.StatusBadRequest, w.Code)
 
