@@ -1,6 +1,5 @@
 package handlers
 
-//
 import (
 	"crypto/hmac"
 	"crypto/sha256"
@@ -12,10 +11,11 @@ import (
 )
 
 func CheckSymlinkHash(symlink *storage.Symlink, hmacSecret string) bool {
-	path := fmt.Sprintf("expiration=%s&id=%s&name=%s", symlink.Expiration, symlink.Id, symlink.Name)
+
+	signature := storage.MakeSymlinkSignature(symlink.Expiration, symlink.Id, symlink.Name)
 
 	h := hmac.New(sha256.New, []byte(hmacSecret))
-	_, err := h.Write([]byte(path))
+	_, err := h.Write([]byte(signature))
 	if err != nil {
 		panic(err)
 	}

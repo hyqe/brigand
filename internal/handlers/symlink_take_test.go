@@ -21,15 +21,16 @@ import (
 func formatSymlink(md *storage.Metadata, hmacSecret string) string {
 	// RFC3339 2006-01-02T15:04:05Z07:00
 	theTime := time.Now().Add(time.Hour).Format(time.RFC3339)
-	query := fmt.Sprintf("expiration=%s&id=%s&name=%s", theTime, md.Id, md.FileName)
+	signature := storage.MakeSymlinkSignature(theTime, md.Id, md.FileName)
 
 	h := hmac.New(sha256.New, []byte(hmacSecret))
-	_, err := h.Write([]byte(query))
+	_, err := h.Write([]byte(signature))
 	if err != nil {
 		panic(err)
 	}
 	hash := hex.EncodeToString(h.Sum(nil))
 
+	query := storage.MakeSymlinkQuery(theTime, md.Id)
 	symlink := fmt.Sprintf("/symlink/take/{name}?hash=%s&%s", hash, query)
 
 	return symlink
@@ -38,15 +39,16 @@ func formatSymlink(md *storage.Metadata, hmacSecret string) string {
 func formatSymlinkWithBadTime(md *storage.Metadata, hmacSecret string) string {
 	// RFC3339 2006-01-02T15:04:05Z07:00
 	theTime := time.Now().Add(-time.Hour).Format(time.RFC3339)
-	query := fmt.Sprintf("expiration=%s&id=%s&name=%s", theTime, md.Id, md.FileName)
+	signature := storage.MakeSymlinkSignature(theTime, md.Id, md.FileName)
 
 	h := hmac.New(sha256.New, []byte(hmacSecret))
-	_, err := h.Write([]byte(query))
+	_, err := h.Write([]byte(signature))
 	if err != nil {
 		panic(err)
 	}
 	hash := hex.EncodeToString(h.Sum(nil))
 
+	query := storage.MakeSymlinkQuery(theTime, md.Id)
 	symlink := fmt.Sprintf("/symlink/take/{name}?hash=%s&%s", hash, query)
 
 	return symlink

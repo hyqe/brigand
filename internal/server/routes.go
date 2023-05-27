@@ -35,7 +35,7 @@ func Routes(
 		Queries()
 
 	// return a  symlink
-	r.HandleFunc("/symlink/make/{name}", handlers.MakeSymlink(metadataClient, fileUploader, getFileIdQueryParam, symlinkSecret)).Methods(http.MethodPost)
+	r.HandleFunc("/symlink/make/{name}", handlers.MakeSymlink(metadataClient, fileUploader, getFilename, symlinkSecret)).Methods(http.MethodPost)
 
 	// return a file from symlink
 	r.HandleFunc("/symlink/take/{name}", handlers.TakeSymlink(fileDownloader, symlinkSecret, storage.SymlinkFromQuery)).Methods(http.MethodGet)
@@ -43,10 +43,18 @@ func Routes(
 	return r
 }
 
-func getFileId(r *http.Request) string {
-	return mux.Vars(r)["fileId"]
+func getFilename(r *http.Request) string {
+	filename := mux.Vars(r)["name"]
+	if filename == "" {
+		panic("NO FILE NAME")
+	}
+	return filename
 }
 
-func getFileIdQueryParam(r *http.Request) string {
-	return r.URL.Query().Get("name")
+func getFileId(r *http.Request) string {
+	filename := mux.Vars(r)["fileId"]
+	if filename == "" {
+		panic("NO FILE NAME")
+	}
+	return filename
 }

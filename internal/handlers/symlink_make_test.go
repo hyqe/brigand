@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"github.com/gorilla/mux"
 	"github.com/hyqe/brigand/internal/handlers"
 	"github.com/hyqe/brigand/internal/storage"
 	"github.com/stretchr/testify/require"
@@ -38,14 +37,12 @@ func Test_MakeSymlink_happy_path(t *testing.T) {
 	}
 
 	getFileId := func(r *http.Request) string {
-		return mux.Vars(r)["name"]
+		return "breaker"
 	}
 
 	path := "/"
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, path, fileContent)
-
-	r = mux.SetURLVars(r, map[string]string{"name": "breaker"})
 
 	handlers.MakeSymlink(mockMetadataClient, mockFileUploader, getFileId, symlinkSecret).ServeHTTP(w, r)
 	require.Equal(t, http.StatusOK, w.Code)
@@ -75,7 +72,7 @@ func Test_MakeSymlink_no_file_content(t *testing.T) {
 	}
 
 	getFileId := func(r *http.Request) string {
-		return r.URL.Query().Get("name")
+		return "breaker"
 	}
 
 	path := "/symlink/make?name=Breaker"
