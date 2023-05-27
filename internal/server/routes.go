@@ -13,7 +13,7 @@ func Routes(
 	metadataClient storage.MetadataClient,
 	fileDownloader storage.FileDownloader,
 	fileUploader storage.FileUploader,
-
+	symlinkSecret string,
 ) http.Handler {
 	r := mux.NewRouter()
 
@@ -34,9 +34,27 @@ func Routes(
 		Methods(http.MethodGet).
 		Queries()
 
+	// return a  symlink
+	r.HandleFunc("/symlink/make/{name}", handlers.MakeSymlink(metadataClient, fileUploader, getFilename, symlinkSecret)).Methods(http.MethodPost)
+
+	// return a file from symlink
+	r.HandleFunc("/symlink/take/{name}", handlers.TakeSymlink(fileDownloader, symlinkSecret, storage.SymlinkFromQuery)).Methods(http.MethodGet)
+
 	return r
 }
 
+func getFilename(r *http.Request) string {
+	filename := mux.Vars(r)["name"]
+	if filename == "" {
+		panic("NO FILE NAME")
+	}
+	return filename
+}
+
 func getFileId(r *http.Request) string {
-	return mux.Vars(r)["fileId"]
+	filename := mux.Vars(r)["fileId"]
+	if filename == "" {
+		panic("NO FILE NAME")
+	}
+	return filename
 }
